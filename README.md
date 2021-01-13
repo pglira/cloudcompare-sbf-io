@@ -1,2 +1,2 @@
 # cloudcompare-sbf-io
-Support for CloudCompare's sbf format in matlab
+Support for CloudCompare's sbf format in Matlab
