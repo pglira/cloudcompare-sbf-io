@@ -17,7 +17,7 @@ function [header, data] = sbfread(file)
 % ------------------------------------------------------------------------------
 % EXAMPLES
 % 1 Read sbf file.
-%   [header, data] = readsbf('Lion.sbf');
+%   [header, data] = sbfread('Lion.sbf');
 % ------------------------------------------------------------------------------
 % philipp.glira@gmail.com
 % ------------------------------------------------------------------------------
@@ -30,27 +30,27 @@ function [header, data] = sbfread(file)
     data = readBinaryFile([file '.data']);
 
     compareDuplicateEntries(header, data);
-    
+
 end
 
 function header = readAsciiFile(file)
 % READASCIIFILE Read header metadata from '.sbf' ascii file.
 
     header = struct;
-    
+
     % Open file
     fid = fopen(file, 'rt');
     if fid == -1
         error('Can not read ''%s''!', file);
     end
     header.file = file;
-    
+
     % Check first line
     tline = fgetl(fid);
     if ~strcmpi(tline, '[SBF]')
         error('''%s'' does not contain ''[SBF]'' on the first line!', file);
     end
-    
+
     % Read rest of file into structure
     tline = fgetl(fid);
     noLine = 2;
@@ -87,7 +87,7 @@ function header = readAsciiFile(file)
        tline = fgetl(fid);
        noLine = noLine+1;
     end
-    
+
     fclose(fid);
 
 end
@@ -103,17 +103,17 @@ function data = readBinaryFile(file)
         error('Can not read ''%s''!', file);
     end
     data.file = file;
-    
+
     % Read header
     fseek(fid, 2, 'bof');
     data.Points = fread(fid, 1, 'uint64');
     data.SFCount = fread(fid, 1, 'integer*2');
     data.GlobalShift = fread(fid, [1,3], 'double');
-    
+
     % Read point cloud data
     fseek(fid, 64, 'bof');
     data.XA = fread(fid, [3+data.SFCount data.Points], 'single');
-    
+
     fclose(fid);
 
 end
@@ -122,23 +122,23 @@ function compareDuplicateEntries(header, data)
 % COMPAREDUPLICATEENTRIES Compare duplicate entries in header and data structure.
 
     entriesToCompare = ["Points" "SFCount" "GlobalShift"];
-    
+
     for entry = entriesToCompare
-        
+
         if ~isfield(header, entry)
             warning('File ''%s'' does not contain the entry ''%s''.', header.file, entry);
             continue;
         end
-        
+
         if ~isfield(data, entry)
             warning('File ''%s'' does not contain the entry ''%s''.', data.file, entry);
             continue;
         end
-        
+
         if header.(entry) ~= data.(entry)
             warning('Values for ''%s'' in header file and data file are not the same.', entry);
         end
-        
+
     end
-    
+
 end
